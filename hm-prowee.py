@@ -21,9 +21,11 @@ MAX_POINTS = 13
 MAX_ENDTIME = 1440
 
 def pp(jsontext):
+    """Pretty print json text"""
     print(json.dumps(jsontext, sort_keys=True, indent=4, separators=(',', ': ')))
 
 def list_devices():
+    """List devices from server"""
     try:
         heaters = xmlc.getPeerId(4, "HM-CC-RT-DN")
     except:
@@ -33,9 +35,16 @@ def list_devices():
         print(xmlc.getDeviceInfo(i))
 
 def print_paramsets(id):
+    """Print Parameterset from id
+
+    :param id: ID to receive Parameterset for"""
     pp(xmlc.getParamset(int(id), 0, "MASTER"))
 
 def calculate_minutes_from_midnight(timedef):
+    """Calculate from time the minites from midnight
+
+    :param timedef: Time to calculate minutes from midnight. Eg. '07:00'
+    :returns: Minutes from midnight"""
     l = timedef.split(":")
     if not len(l) == 2:
         raise TypeError("{0} is not in format HH:MM!".format(timedef))
@@ -46,12 +55,20 @@ def calculate_minutes_from_midnight(timedef):
     return minutes
 
 def parse_temperature_item(item):
+    """Parse item for time and temperature
+
+    :param item: Definition, eg. '17.0 > 07:00'
+    :returns: dict with temperature and minutes"""
     temp_time_tupel = item.split(">")
     temperature = float(temp_time_tupel[0].strip())
     minutes_from_midnight = calculate_minutes_from_midnight(temp_time_tupel[1].strip())
     return { 'minutes_from_midnight' : minutes_from_midnight, 'temperature' : temperature}
 
 def parse_temperature_definition(temp_def_raw):
+    """Parse list of temperature definitions
+
+    :param temp_def_raw: List separated by ';' of temperature/time definitions
+    :returns: list of hashes with temperature/time definitions"""
     temp_def_list = filter(None, temp_def_raw.split(";"))
     l = []
     for i in temp_def_list:
@@ -59,6 +76,10 @@ def parse_temperature_definition(temp_def_raw):
     return l
 
 def read_from_file(filename):
+    """Read config file
+
+    :param filename: Filename to read from
+    :returns: Parsed definition of each line"""
     lines = []
     with open(filename, "r") as config:
         lines = config.read().splitlines()
@@ -73,6 +94,10 @@ def read_from_file(filename):
     return deflist
 
 def set_temp_to_homegear(id, definition_list):
+    """Send list of definitions to ID
+
+    :param id: ID to receive definition
+    :param definition_list: List of temperature/time definitions"""
     paramset_list = []
     last_temperature = 17.0
     for weekday, templist in definition_list.items():
@@ -100,6 +125,10 @@ def set_temp_to_homegear(id, definition_list):
         xmlc.putParamset(int(id), 0, "MASTER", i)
 
 def set_temp_config(id, template_file):
+    """Read file and send to server
+
+    :param id: ID to receive values
+    :param template_file: File to read from"""
     config_from_file = read_from_file(template_file)
     set_temp_to_homegear(id, config_from_file)
 
