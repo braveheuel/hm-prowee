@@ -72,9 +72,36 @@ def read_from_file(filename):
 
     return deflist
 
+def set_temp_to_homegear(id, definition_list):
+    paramset_list = []
+    last_temperature = 17.0
+    for weekday, templist in definition_list.items():
+        for i in range(1, MAX_POINTS+1):
+            temp_dict = {}
+            endtime_dict = {}
+            temperature_key = "TEMPERATURE_{0}_{1}".format(weekday.upper(), i)
+            endtime_key = "ENDTIME_{0}_{1}".format(weekday.upper(), i)
+            if i > len(templist):
+                temperature_value = last_temperature
+                endtime_value = MAX_ENDTIME
+            else:
+                temperature_value = templist[i-1]["temperature"]
+                endtime_value = templist[i-1]["minutes_from_midnight"]
+                last_temperature = temperature_value
+
+            temp_dict[temperature_key] = float(temperature_value)
+            endtime_dict[endtime_key] = endtime_value
+            paramset_list.append(temp_dict)
+            paramset_list.append(endtime_dict)
+            if endtime_value == MAX_ENDTIME:
+                break
+    for i in paramset_list:
+        print("Sending", i, "...")
+        xmlc.putParamset(int(id), 0, "MASTER", i)
 
 def set_temp_config(id, template_file):
     config_from_file = read_from_file(template_file)
+    set_temp_to_homegear(id, config_from_file)
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
