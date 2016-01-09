@@ -17,6 +17,8 @@ import json
 from docopt import docopt
 import getpass
 
+MAX_POINTS = 13
+MAX_ENDTIME = 1440
 
 def pp(jsontext):
     print(json.dumps(jsontext, sort_keys=True, indent=4, separators=(',', ': ')))
@@ -33,16 +35,43 @@ def list_devices():
 def print_paramsets(id):
     pp(xmlc.getParamset(int(id), 0, "MASTER"))
 
+def calculate_minutes_from_midnight(timedef):
+    l = timedef.split(":")
+    if not len(l) == 2:
+        raise TypeError("{0} is not in format HH:MM!".format(timedef))
+    hours = int(l[0])
+    minutes = hours*60 + int(l[1])
+    if minutes > MAX_ENDTIME:
+        minutes = MAX_ENDTIME
+    return minutes
+
+def parse_temperature_item(item):
+    temp_time_tupel = item.split(">")
+    temperature = float(temp_time_tupel[0].strip())
+    minutes_from_midnight = calculate_minutes_from_midnight(temp_time_tupel[1].strip())
+    return { 'minutes_from_midnight' : minutes_from_midnight, 'temperature' : temperature}
+
+def parse_temperature_definition(temp_def_raw):
+    temp_def_list = filter(None, temp_def_raw.split(";"))
+    l = []
+    for i in temp_def_list:
+        l.append(parse_temperature_item(i))
+    return l
+
 def read_from_file(filename):
     lines = []
     with open(filename, "r") as config:
         lines = config.read().splitlines()
 
+    deflist = {}
     for i in lines:
-        l = str(i).split(":")
-        weekday = l[0]
-        for i in l[1:]:
-            print(weekday, i)
+        l = i.split("=")
+        weekday = l[0].strip()
+        temp_def = parse_temperature_definition(l[1])
+        deflist[weekday] = temp_def
+
+    return deflist
+
 
 def set_temp_config(id, template_file):
     config_from_file = read_from_file(template_file)
