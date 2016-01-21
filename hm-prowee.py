@@ -20,6 +20,12 @@ import getpass
 MAX_POINTS = 13
 MAX_ENDTIME = 1440
 
+#
+# Homegear constants
+#
+HG_FILTER_BY_TYPE_ID = 3
+HG_HEATERS_TYPE_ID = "0x95"
+
 def pp(jsontext):
     """Pretty print json text"""
     print(json.dumps(jsontext, sort_keys=True, indent=4, separators=(',', ': ')))
@@ -27,12 +33,12 @@ def pp(jsontext):
 def list_devices():
     """List devices from server"""
     try:
-        heaters = xmlc.getPeerId(4, "HM-CC-RT-DN")
+        heaters = xmlc.getPeerId(HG_FILTER_BY_TYPE_ID, HG_HEATERS_TYPE_ID)
     except:
         print("Can't load list of Devices!")
         exit(1)
     for i in heaters:
-        print(xmlc.getDeviceInfo(i))
+        pp(xmlc.getDeviceInfo(i, ["ID", "NAME"]))
 
 def print_paramsets(id):
     """Print Parameterset from id
