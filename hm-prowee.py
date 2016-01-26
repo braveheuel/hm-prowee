@@ -17,12 +17,12 @@ import json
 from docopt import docopt
 import getpass
 
+xmlc = None
+
 MAX_POINTS = 13
 MAX_ENDTIME = 1440
 
-#
 # Homegear constants
-#
 HG_FILTER_BY_TYPE_ID = 3
 HG_HEATERS_TYPE_ID = "0x95"
 
@@ -139,7 +139,19 @@ if __name__ == "__main__":
 
     passwd = getpass.getpass()
 
-    xmlc = xmlrpc.client.ServerProxy("https://{0}:{1}@{2}:{3}/".format(arguments['<user>'], passwd, arguments['<server>'], arguments['<port>']), context=ctx)
+    xmlc = xmlrpc.client.ServerProxy(
+        "https://{0}:{1}@{2}:{3}/".format(
+            arguments['<user>'], passwd, arguments['<server>'], arguments['<port>']
+        ),
+    context=ctx)
+
+    try:
+        version = xmlc.getVersion()
+        print("Successfully connected to", version)
+    except:
+        print ("Connection not successful, please check your parameters.")
+        exit(1)
+
     if arguments['list']:
         list_devices()
     elif arguments['print-config']:
