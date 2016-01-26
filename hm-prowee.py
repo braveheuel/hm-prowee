@@ -20,6 +20,12 @@ import getpass
 MAX_POINTS = 13
 MAX_ENDTIME = 1440
 
+#
+# Homegear constants
+#
+HG_FILTER_BY_TYPE_ID = 3
+HG_HEATERS_TYPE_ID = "0x95"
+
 def pp(jsontext):
     """Pretty print json text"""
     print(json.dumps(jsontext, sort_keys=True, indent=4, separators=(',', ': ')))
@@ -27,12 +33,12 @@ def pp(jsontext):
 def list_devices():
     """List devices from server"""
     try:
-        heaters = xmlc.getPeerId(4, "HM-CC-RT-DN")
+        heaters = xmlc.getPeerId(HG_FILTER_BY_TYPE_ID, HG_HEATERS_TYPE_ID)
     except:
         print("Can't load list of Devices!")
         exit(1)
     for i in heaters:
-        print(xmlc.getDeviceInfo(i))
+        pp(xmlc.getDeviceInfo(i, ["ID", "NAME"]))
 
 def print_paramsets(id):
     """Print Parameterset from id
@@ -98,12 +104,10 @@ def set_temp_to_homegear(id, definition_list):
 
     :param id: ID to receive definition
     :param definition_list: List of temperature/time definitions"""
-    paramset_list = []
+    send_dict = {}
     last_temperature = 17.0
     for weekday, templist in definition_list.items():
         for i in range(1, MAX_POINTS+1):
-            temp_dict = {}
-            endtime_dict = {}
             temperature_key = "TEMPERATURE_{0}_{1}".format(weekday.upper(), i)
             endtime_key = "ENDTIME_{0}_{1}".format(weekday.upper(), i)
             if i > len(templist):
@@ -114,15 +118,12 @@ def set_temp_to_homegear(id, definition_list):
                 endtime_value = templist[i-1]["minutes_from_midnight"]
                 last_temperature = temperature_value
 
-            temp_dict[temperature_key] = float(temperature_value)
-            endtime_dict[endtime_key] = endtime_value
-            paramset_list.append(temp_dict)
-            paramset_list.append(endtime_dict)
+            send_dict[temperature_key] = float(temperature_value)
+            send_dict[endtime_key] = endtime_value
             if endtime_value == MAX_ENDTIME:
                 break
-    for i in paramset_list:
-        print("Sending", i, "...")
-        xmlc.putParamset(int(id), 0, "MASTER", i)
+    print(send_dict)
+    xmlc.putParamset(int(id), 0, "MASTER", send_dict)
 
 def set_temp_config(id, template_file):
     """Read file and send to server
