@@ -17,12 +17,12 @@ import json
 from docopt import docopt
 import getpass
 
+xmlc = None
+
 MAX_POINTS = 13
 MAX_ENDTIME = 1440
 
-#
 # Homegear constants
-#
 HG_FILTER_BY_TYPE_ID = 3
 HG_HEATERS_TYPE_ID = "0x95"
 
@@ -30,20 +30,20 @@ def pp(jsontext):
     """Pretty print json text"""
     print(json.dumps(jsontext, sort_keys=True, indent=4, separators=(',', ': ')))
 
-def list_devices():
-    """List devices from server"""
+def list_heaters():
+    """List heater devices from server"""
     try:
         heaters = xmlc.getPeerId(HG_FILTER_BY_TYPE_ID, HG_HEATERS_TYPE_ID)
     except:
-        print("Can't load list of Devices!")
+        print("Can't load list of devices!")
         exit(1)
     for i in heaters:
         pp(xmlc.getDeviceInfo(i, ["ID", "NAME"]))
 
 def print_paramsets(id):
-    """Print Parameterset from id
+    """Print parameterset for specific device id
 
-    :param id: ID to receive Parameterset for"""
+    :param id: device ID to receive Parameterset for"""
     pp(xmlc.getParamset(int(id), 0, "MASTER"))
 
 def calculate_minutes_from_midnight(timedef):
@@ -139,9 +139,21 @@ if __name__ == "__main__":
 
     passwd = getpass.getpass()
 
-    xmlc = xmlrpc.client.ServerProxy("https://{0}:{1}@{2}:{3}/".format(arguments['<user>'], passwd, arguments['<server>'], arguments['<port>']), context=ctx)
+    xmlc = xmlrpc.client.ServerProxy(
+        "https://{0}:{1}@{2}:{3}/".format(
+            arguments['<user>'], passwd, arguments['<server>'], arguments['<port>']
+        ),
+    context=ctx)
+
+    try:
+        version = xmlc.getVersion()
+        print("Successfully connected to", version)
+    except:
+        print ("Connection not successful, please check your parameters.")
+        exit(1)
+
     if arguments['list']:
-        list_devices()
+        list_heaters()
     elif arguments['print-config']:
         print_paramsets(arguments["<id>"])
     elif arguments['set-temp']:
