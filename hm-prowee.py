@@ -37,8 +37,9 @@ def list_heaters():
     except:
         print("Can't load list of devices!")
         exit(1)
+    print("{0:4} {1}".format("ID", "Name"));
     for i in heaters:
-        pp(xmlc.getDeviceInfo(i, ["ID", "NAME"]))
+        print("{0:4} {1}".format(i, xmlc.getName(i)))
 
 def print_paramsets(id):
     """Print parameterset for specific device id
