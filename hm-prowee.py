@@ -7,7 +7,7 @@
 #
 """
 Usage:
-    hm-prowee -u <user> -s <server> -p <port> list [<type>]
+    hm-prowee -u <user> -s <server> -p <port> list
     hm-prowee -u <user> -s <server> -p <port> print-config <id>
     hm-prowee -u <user> -s <server> -p <port> set-temp <id> <file>
 """
