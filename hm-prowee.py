@@ -124,6 +124,9 @@ def read_from_file(filename):
 
     deflist = {}
     for i in lines:
+        if i.startswith("#"):
+            print("Comment Line, ignoring")
+            continue
         l = i.split("=")
         weekday = l[0].strip()
         temp_def = parse_temperature_definition(l[1])
