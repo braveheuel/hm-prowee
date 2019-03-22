@@ -18,6 +18,8 @@ The `list`-command will list all devices with type "0x95", which means the "HM-C
 
 The `print-config` will print the actual config of the `<id>`.
 
+The `print-temp` command will print the current temperature data of the device with `id` and may act as a starting point to get the current schedule as a temperature file.
+
 The `set-temp` command will then set the device with the `id` the temperature config from the `file`. For the syntax of the file see below.
 
 ## Syntax of the Temperature file

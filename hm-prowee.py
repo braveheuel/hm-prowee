@@ -9,6 +9,7 @@
 Usage:
     hm-prowee -u <user> -s <server> -p <port> list
     hm-prowee -u <user> -s <server> -p <port> print-config <id>
+    hm-prowee -u <user> -s <server> -p <port> print-temp <id>
     hm-prowee -u <user> -s <server> -p <port> set-temp <id> <file>
 """
 import xmlrpc.client
@@ -46,6 +47,30 @@ def print_paramsets(id):
 
     :param id: device ID to receive Parameterset for"""
     pp(xmlc.getParamset(int(id), 0, "MASTER"))
+    
+def print_temp_config(id):
+    """Print temp config file for specific device id
+
+    :param id: device ID to receive temp config for"""
+    params = xmlc.getParamset(int(id), 0, "MASTER")
+    weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
+    for weekday in weekdays:
+        elements = []
+        
+        for i in range(1, MAX_POINTS+1):
+            temperature_key = "TEMPERATURE_{0}_{1}".format(weekday.upper(), i)
+            endtime_key = "ENDTIME_{0}_{1}".format(weekday.upper(), i)
+            
+            temperature_value = params[temperature_key]
+            endtime_value = params[endtime_key]
+            
+            elements.append("{0:.1f} > {1};".format(temperature_value, calculate_timedef_from_minutes(endtime_value)))
+            
+            if endtime_value == MAX_ENDTIME:
+                break
+        
+        print("{0} = {1}".format(weekday.upper(), " ".join(elements))) 
 
 def calculate_minutes_from_midnight(timedef):
     """Calculate from time the minites from midnight
@@ -60,6 +85,12 @@ def calculate_minutes_from_midnight(timedef):
     if minutes > MAX_ENDTIME:
         minutes = MAX_ENDTIME
     return minutes
+    
+def calculate_timedef_from_minutes(minutes):
+    """Calculate time from minutes from midnight
+
+    :param timedef: Minutes from midnight for calculation"""
+    return "{0:02}:{1:02}".format(int(minutes / 60), minutes % 60)
 
 def parse_temperature_item(item):
     """Parse item for time and temperature
@@ -157,6 +188,8 @@ if __name__ == "__main__":
         list_heaters()
     elif arguments['print-config']:
         print_paramsets(arguments["<id>"])
+    elif arguments['print-temp']:
+        print_temp_config(arguments["<id>"])
     elif arguments['set-temp']:
         set_temp_config(arguments["<id>"], arguments["<file>"])
 
