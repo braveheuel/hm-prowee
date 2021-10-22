@@ -270,8 +270,8 @@ def main():
         version = xmlc.getVersion()
         print(f"Successfully connected to server {cfg['server']}"
               f", running version {version}", file=sys.stderr)
-    except Exception:
-        print("Connection not successful, please check your parameters.")
+    except Exception as e:
+        print("Connection not successful, please check your parameters.", e)
         exit(1)
 
     args.func(xmlc, args)
