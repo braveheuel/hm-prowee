@@ -183,6 +183,12 @@ def set_temp_config(xmlc, args):
     set_temp_to_homegear(xmlc, args.id, config_from_file)
 
 
+def set_value(xmlc, args):
+    """Set Value of Device"""
+    send_dict = {args.variableName: args.value}
+    xmlc.putParamset(int(args.id), int(args.channel), send_dict)
+
+
 def _map_cli_config(mapping, args, ini):
     res_config = {}
     for i in mapping:
@@ -224,6 +230,14 @@ def get_config_and_args():
     settemp_p.add_argument("id")
     settemp_p.add_argument("file")
     settemp_p.set_defaults(func=set_temp_config)
+
+    set_value_p = subparsers.add_parser(
+        "set-value", help="Set Device Value")
+    set_value_p.add_argument("id")
+    set_value_p.add_argument("channel")
+    set_value_p.add_argument("variableName")
+    set_value_p.add_argument("value")
+    set_value_p.set_defaults(func=set_value)
 
     args = parser.parse_args()
 
