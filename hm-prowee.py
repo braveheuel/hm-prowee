@@ -43,7 +43,7 @@ def list_heaters(xmlc, args):
     except Exception:
         print("Can't load list of devices!")
         exit(1)
-    print("{0:4} {1}".format("ID", "Name"))
+    print("{0:4} {1}".format("ID", "Name"), file=sys.stderr)
     for i in heaters:
         print("{0:4} {1}".format(i, xmlc.getName(i)))
 
