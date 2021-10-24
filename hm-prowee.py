@@ -50,7 +50,7 @@ def list_heaters(xmlc, args):
 
 def print_paramsets(xmlc, args):
     """Print parameterset for specific device id"""
-    pp(xmlc.getParamset(int(args.id), 0, "MASTER"))
+    pp(xmlc.getParamset(int(args.id), 0))
 
 
 def print_temp_config(xmlc, args):
@@ -171,7 +171,7 @@ def set_temp_to_homegear(xmlc, id, definition_list):
             if endtime_value == MAX_ENDTIME:
                 break
     print(send_dict)
-    xmlc.putParamset(int(id), 0, "MASTER", send_dict)
+    xmlc.putParamset(int(id), 0, send_dict)
 
 
 def set_temp_config(xmlc, args):
