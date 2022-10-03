@@ -43,14 +43,14 @@ def list_heaters(xmlc, args):
     except Exception:
         print("Can't load list of devices!")
         exit(1)
-    print("{0:4} {1}".format("ID", "Name"))
+    print("{0:4} {1}".format("ID", "Name"), file=sys.stderr)
     for i in heaters:
         print("{0:4} {1}".format(i, xmlc.getName(i)))
 
 
 def print_paramsets(xmlc, args):
     """Print parameterset for specific device id"""
-    pp(xmlc.getParamset(int(args.id), 0, "MASTER"))
+    pp(xmlc.getParamset(int(args.id), 0))
 
 
 def print_temp_config(xmlc, args):
@@ -171,7 +171,7 @@ def set_temp_to_homegear(xmlc, id, definition_list):
             if endtime_value == MAX_ENDTIME:
                 break
     print(send_dict)
-    xmlc.putParamset(int(id), 0, "MASTER", send_dict)
+    xmlc.putParamset(int(id), 0, send_dict)
 
 
 def set_temp_config(xmlc, args):
@@ -181,6 +181,12 @@ def set_temp_config(xmlc, args):
     :param template_file: File to read from"""
     config_from_file = read_from_file(args.file)
     set_temp_to_homegear(xmlc, args.id, config_from_file)
+
+
+def set_value(xmlc, args):
+    """Set Value of Device"""
+    send_dict = {args.variableName: args.value}
+    xmlc.putParamset(int(args.id), int(args.channel), 0, 1, send_dict)
 
 
 def _map_cli_config(mapping, args, ini):
@@ -224,6 +230,14 @@ def get_config_and_args():
     settemp_p.add_argument("id")
     settemp_p.add_argument("file")
     settemp_p.set_defaults(func=set_temp_config)
+
+    set_value_p = subparsers.add_parser(
+        "set-value", help="Set Device Value")
+    set_value_p.add_argument("id")
+    set_value_p.add_argument("channel")
+    set_value_p.add_argument("variableName")
+    set_value_p.add_argument("value")
+    set_value_p.set_defaults(func=set_value)
 
     args = parser.parse_args()
 
