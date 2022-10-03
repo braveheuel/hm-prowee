@@ -186,7 +186,7 @@ def set_temp_config(xmlc, args):
 def set_value(xmlc, args):
     """Set Value of Device"""
     send_dict = {args.variableName: args.value}
-    xmlc.putParamset(int(args.id), int(args.channel), send_dict)
+    xmlc.putParamset(int(args.id), int(args.channel), 0, 1, send_dict)
 
 
 def _map_cli_config(mapping, args, ini):
